@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Catalogue XML Lab</title>
+    <style>
+        .book-card{
+            border:1px solid #444;
+            padding:15px;
+            margin:10px;
+            max-width:500px;
+            border-radius:6px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Book Catalogue</h1>
+    <div id="bookContainer"></div>
+
+    <script>
+        const container = document.getElementById("bookContainer");
+
+        // fetch 获取book.xml
+        fetch("book.xml")
+        .then(response=>{
+            if(!response.ok){
+                throw new Error("Fetch error: "+response.status);
+            }
+            return response.text(); // xml要拿text，不是json！！
+        })
+        .then(xmlText=>{
+            // 实验文档给的标准解析代码 DOMParser
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlText,'text/xml');
+
+            // 获取所有book节点
+            const bookList = xmlDoc.querySelectorAll("book");
+
+            bookList.forEach(book=>{
+                // 获取id属性
+                const bookId = book.getAttribute("id");
+                // 获取子元素文本
+                const title = book.querySelector("title").textContent;
+                const author = book.querySelector("author").textContent;
+                const price = book.querySelector("price").textContent;
+
+                // 创建卡片渲染到页面
+                const div = document.createElement("div");
+                div.className = "book-card";
+                div.innerHTML = `
+                    <p><strong>Book ID:</strong> ${bookId}</p>
+                    <p><strong>Title:</strong> ${title}</p>
+                    <p><strong>Author:</strong> ${author}</p>
+                    <p><strong>Price:</strong> $${price}</p>
+                `;
+                container.appendChild(div);
+            })
+        })
+        .catch(err=>{
+            console.error("Fetch error: "+err.message);
+            container.innerText = "Error loading XML data!";
+        })
+    </script>
+</body>
+</html>
